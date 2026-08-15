@@ -1,0 +1,60 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Gradle
+# ──────────────────────────────────────────────────────────────────────────────
+.gradle/
+build/
+**/build/
+
+# Gradle wrapper jar is intentionally committed; the rest is not
+!gradle/wrapper/gradle-wrapper.jar
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Android
+# ──────────────────────────────────────────────────────────────────────────────
+local.properties
+*.keystore
+*.jks
+captures/
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Kotlin / KMP compiler caches
+# ──────────────────────────────────────────────────────────────────────────────
+.kotlin/
+kotlin-js-store/
+
+# ──────────────────────────────────────────────────────────────────────────────
+# IntelliJ / Android Studio
+# ──────────────────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.navigation/
+
+# ──────────────────────────────────────────────────────────────────────────────
+# macOS
+# ──────────────────────────────────────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Xcode / iOS (for KMP iOS targets + iosApp sample)
+# ──────────────────────────────────────────────────────────────────────────────
+xcuserdata/
+**/*.xcodeproj/xcuserdata/
+**/*.xcworkspace/xcuserdata/
+DerivedData/
+*.xccheckout
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+# Xcode scheme files are user-specific
+**/*.xcscheme
