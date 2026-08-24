@@ -1,5 +1,6 @@
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinMultiplatform
+import org.jetbrains.compose.ExperimentalComposeLibrary
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -33,6 +34,14 @@ kotlin {
 
         commonTest.dependencies {
             implementation(kotlin("test"))
+        }
+
+        val desktopTest by getting {
+            dependencies {
+                @OptIn(ExperimentalComposeLibrary::class)
+                implementation(compose.desktop.uiTestJUnit4)
+                implementation(compose.desktop.currentOs)
+            }
         }
     }
 }
