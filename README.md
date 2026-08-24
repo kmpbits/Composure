@@ -19,13 +19,27 @@ dependencies {
 }
 ```
 
-**SwiftUI** — build the XCFramework and link it into your Xcode project:
+**SwiftUI** — via Swift Package Manager (recommended): in Xcode, *File → Add Package Dependencies…* and enter:
+
+```
+https://github.com/kmpbits/Composure.git
+```
+
+Pick the `Composure` product and a version, or add it to your own `Package.swift`:
+
+```swift
+.package(url: "https://github.com/kmpbits/Composure.git", from: "0.1.0")
+```
+
+Then `import composure_ios` in Swift. Releases are published automatically from CI whenever a `vX.Y.Z` tag is pushed — see `.github/workflows/release-spm.yml`.
+
+Alternatively, build the XCFramework yourself and link it manually:
 
 ```bash
 ./gradlew :composure-ios:assembleComposureIosReleaseXCFramework
 ```
 
-This produces `composure-ios/build/XCFrameworks/release/composureIos.xcframework`. Add it to your Xcode project's *Frameworks, Libraries, and Embedded Content* and `import composure_ios` in Swift. See `iosApp/` in this repo for a complete sample, including the `ComposureForm`/`ComposureField` SwiftUI wrapper pattern in `iosApp/iosApp/ComposureFormKit.swift`.
+This produces `composure-ios/build/XCFrameworks/release/composureIos.xcframework`. Add it to your Xcode project's *Frameworks, Libraries, and Embedded Content*. See `iosApp/` in this repo for a complete sample, including the `ComposureForm`/`ComposureField` SwiftUI wrapper pattern in `iosApp/iosApp/ComposureFormKit.swift`.
 
 ## Usage (Compose Multiplatform)
 

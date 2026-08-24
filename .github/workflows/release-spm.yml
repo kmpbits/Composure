@@ -1,0 +1,121 @@
+name: Release SPM Package
+
+# Triggered by pushing a tag like "v0.1.0". Builds the release XCFramework,
+# publishes it as a GitHub Release asset, then writes a Package.swift that
+# points at that asset's URL and checksum.
+#
+# Chicken-and-egg note: the checksum can only be computed *after* building
+# from the tagged commit, but Package.swift at that same commit needs to
+# already contain it for `swift package resolve` to work. This workflow
+# resolves that by committing the updated Package.swift to `main` and then
+# force-moving the tag to point at that new commit — the only tag ref this
+# workflow ever force-pushes, never a branch.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout the tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Resolve version from the tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Run Kotlin tests before releasing
+        run: ./gradlew allTests --continue
+
+      - name: Build the release XCFramework
+        run: ./gradlew :composure-ios:assembleComposureIosReleaseXCFramework
+
+      - name: Zip the XCFramework
+        working-directory: composure-ios/build/XCFrameworks/release
+        run: zip -r -X composureIos.xcframework.zip composureIos.xcframework
+
+      - name: Compute the SPM checksum
+        id: checksum
+        working-directory: composure-ios/build/XCFrameworks/release
+        run: echo "checksum=$(swift package compute-checksum composureIos.xcframework.zip)" >> "$GITHUB_OUTPUT"
+
+      - name: Publish the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            "composure-ios/build/XCFrameworks/release/composureIos.xcframework.zip" \
+            --title "${{ steps.version.outputs.tag }}" \
+            --generate-notes
+
+      - name: Generate Package.swift for this version
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          CHECKSUM: ${{ steps.checksum.outputs.checksum }}
+          REPO: ${{ github.repository }}
+        run: |
+          cat > /tmp/Package.swift <<EOF
+          // swift-tools-version:5.9
+          import PackageDescription
+
+          let package = Package(
+              name: "Composure",
+              platforms: [.iOS(.v16)],
+              products: [
+                  .library(name: "Composure", targets: ["ComposureIos"]),
+              ],
+              targets: [
+                  .binaryTarget(
+                      name: "ComposureIos",
+                      url: "https://github.com/${REPO}/releases/download/${TAG}/composureIos.xcframework.zip",
+                      checksum: "${CHECKSUM}"
+                  ),
+              ]
+          )
+          EOF
+
+      - name: Commit Package.swift to main
+        id: publish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout -B release-main origin/main
+          cp /tmp/Package.swift ./Package.swift
+          git add Package.swift
+          if git diff --cached --quiet; then
+            echo "Package.swift already up to date; nothing to commit"
+          else
+            git commit -m "release: SPM package for ${{ steps.version.outputs.tag }}"
+            git push origin release-main:main
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Move the release tag onto the Package.swift commit
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          SHA="${{ steps.publish.outputs.sha }}"
+          git tag -f "$TAG" "$SHA"
+          git push origin "refs/tags/$TAG" --force
