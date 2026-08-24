@@ -31,7 +31,7 @@ Pick the `Composure` product and a version, or add it to your own `Package.swift
 .package(url: "https://github.com/kmpbits/Composure.git", from: "0.1.0")
 ```
 
-Then `import composure_ios` in Swift. Releases are published automatically from CI whenever a `vX.Y.Z` tag is pushed — see `.github/workflows/release-spm.yml`.
+Then `import composure_ios` in Swift. Releases are published automatically from CI whenever a `vX.Y.Z` tag is pushed — see `.github/workflows/release.yml`.
 
 Alternatively, build the XCFramework yourself and link it manually:
 
