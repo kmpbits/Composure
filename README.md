@@ -16,8 +16,8 @@ Type-safe, coroutine-based form state and validation for Kotlin Multiplatform â€
 
 ```kotlin
 dependencies {
-    implementation("io.github.kmpbits:composure-core:0.2.0")
-    implementation("io.github.kmpbits:composure-compose:0.2.0")
+    implementation("io.github.kmpbits:composure-core:<version>")
+    implementation("io.github.kmpbits:composure-compose:<version>")
 }
 ```
 
