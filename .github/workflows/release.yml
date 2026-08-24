@@ -68,7 +68,7 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_IN_MEMORY_KEY_PASSWORD }}
-        run: ./gradlew publishToMavenCentral
+        run: ./gradlew publishToMavenCentral --no-configuration-cache
 
       - name: Build the release XCFramework
         run: ./gradlew :composure-ios:assembleComposureIosReleaseXCFramework
