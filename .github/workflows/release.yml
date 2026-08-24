@@ -82,14 +82,40 @@ jobs:
         working-directory: composure-ios/build/XCFrameworks/release
         run: echo "checksum=$(swift package compute-checksum composureIos.xcframework.zip)" >> "$GITHUB_OUTPUT"
 
+      - name: Extract the CHANGELOG section for this version
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          awk -v ver="$VERSION" '
+            /^## \[/ {
+              if (found) exit
+              if ($0 ~ "\\[" ver "\\]") { found=1; next }
+              next
+            }
+            /^\[.*\]: / { if (found) exit }
+            found { print }
+          ' CHANGELOG.md > /tmp/release-notes.md || true
+          if [ -s /tmp/release-notes.md ]; then
+            echo "has_notes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_notes=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish the GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ steps.version.outputs.tag }}" \
-            "composure-ios/build/XCFrameworks/release/composureIos.xcframework.zip" \
-            --title "${{ steps.version.outputs.tag }}" \
-            --generate-notes
+          if [ "${{ steps.changelog.outputs.has_notes }}" = "true" ]; then
+            gh release create "${{ steps.version.outputs.tag }}" \
+              "composure-ios/build/XCFrameworks/release/composureIos.xcframework.zip" \
+              --title "${{ steps.version.outputs.tag }}" \
+              --notes-file /tmp/release-notes.md
+          else
+            gh release create "${{ steps.version.outputs.tag }}" \
+              "composure-ios/build/XCFrameworks/release/composureIos.xcframework.zip" \
+              --title "${{ steps.version.outputs.tag }}" \
+              --generate-notes
+          fi
 
       - name: Generate Package.swift for this version
         env:
