@@ -59,6 +59,3 @@ DerivedData/
 # Xcode scheme files are user-specific — except shared schemes, which CI needs
 **/*.xcscheme
 !**/xcshareddata/xcschemes/*.xcscheme
-
-# Local working docs — not part of the published repo
-/docs/
