@@ -1,6 +1,8 @@
 # Composure
 
 [![CI](https://github.com/kmpbits/Composure/actions/workflows/ci.yml/badge.svg)](https://github.com/kmpbits/Composure/actions/workflows/ci.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.kmpbits/composure-core?label=release)](https://central.sonatype.com/artifact/io.github.kmpbits/composure-core)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 Type-safe, coroutine-based form state and validation for Kotlin Multiplatform — one form definition shared across Compose Multiplatform and SwiftUI.
 
