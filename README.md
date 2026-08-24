@@ -14,8 +14,8 @@ Type-safe, coroutine-based form state and validation for Kotlin Multiplatform â€
 
 ```kotlin
 dependencies {
-    implementation("io.github.kmpbits:composure-core:0.1.0")
-    implementation("io.github.kmpbits:composure-compose:0.1.0")
+    implementation("io.github.kmpbits:composure-core:0.2.0")
+    implementation("io.github.kmpbits:composure-compose:0.2.0")
 }
 ```
 
@@ -26,13 +26,13 @@ dependencies {
    ```
    https://github.com/kmpbits/Composure.git
    ```
-3. Under *Dependency Rule*, pick a version rule (e.g. "Up to Next Major Version" starting at `0.1.0`), then click **Add Package**.
+3. Under *Dependency Rule*, pick a version rule (e.g. "Up to Next Major Version" starting at `0.2.0`), then click **Add Package**.
 4. In the target-selection sheet that appears, check the `Composure` product against the app target(s) that need it, then click **Add Package** again.
 
 Or, if you're depending on it from your own Swift package instead of an Xcode project, add it to `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/kmpbits/Composure.git", from: "0.1.0")
+.package(url: "https://github.com/kmpbits/Composure.git", from: "0.2.0")
 ```
 
 and add `.product(name: "Composure", package: "Composure")` to the relevant target's dependencies.

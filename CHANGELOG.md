@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-24
+
+No functional changes to `composure-core`, `composure-compose`, or `composure-ios` since 0.1.0. This version exists because 0.1.0 is already published to Maven Central, which doesn't allow re-publishing the same version, but never completed its GitHub Release or Swift Package Manager release due to the pipeline issues below.
+
+### Fixed
+
+- Release pipeline (`release.yml`): the Maven Central publish step now runs with `--no-configuration-cache`, since `publishToMavenCentral` isn't compatible with Gradle's configuration cache yet.
+- Release pipeline: the GitHub Release step is now idempotent, so retrying a tag after an earlier failed attempt no longer errors with "a release with the same tag name already exists".
+
 ## [0.1.0] - 2026-08-24
 
 Initial release.
@@ -23,5 +32,6 @@ Initial release.
 - Sample apps (`sample/composeApp`, `iosApp/`) demonstrating both the inline and typed-class form patterns.
 - Apache 2.0 license.
 
-[Unreleased]: https://github.com/kmpbits/Composure/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/kmpbits/Composure/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/kmpbits/Composure/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/kmpbits/Composure/releases/tag/v0.1.0
