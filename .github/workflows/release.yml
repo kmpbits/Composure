@@ -1,8 +1,9 @@
-name: Release SPM Package
+name: Release
 
-# Triggered by pushing a tag like "v0.1.0". Builds the release XCFramework,
-# publishes it as a GitHub Release asset, then writes a Package.swift that
-# points at that asset's URL and checksum.
+# Triggered by pushing a tag like "v0.1.0". Publishes composure-core,
+# composure-compose, and composure-ios to Maven Central, then builds the
+# release XCFramework, publishes it as a GitHub Release asset, and writes
+# a Package.swift that points at that asset's URL and checksum.
 #
 # Chicken-and-egg note: the checksum can only be computed *after* building
 # from the tagged commit, but Package.swift at that same commit needs to
@@ -10,6 +11,9 @@ name: Release SPM Package
 # resolves that by committing the updated Package.swift to `main` and then
 # force-moving the tag to point at that new commit — the only tag ref this
 # workflow ever force-pushes, never a branch.
+#
+# Required repo secrets: MAVEN_CENTRAL_USERNAME, MAVEN_CENTRAL_PASSWORD,
+# SIGNING_IN_MEMORY_KEY, SIGNING_IN_MEMORY_KEY_PASSWORD.
 
 on:
   push:
@@ -46,8 +50,25 @@ jobs:
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
+      - name: Verify the tag matches VERSION_NAME
+        run: |
+          GRADLE_VERSION=$(grep '^VERSION_NAME=' gradle.properties | cut -d'=' -f2)
+          TAG_VERSION="${{ steps.version.outputs.version }}"
+          if [ "$GRADLE_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match gradle.properties VERSION_NAME ($GRADLE_VERSION). Bump VERSION_NAME, commit, and push to main before tagging."
+            exit 1
+          fi
+
       - name: Run Kotlin tests before releasing
         run: ./gradlew allTests --continue
+
+      - name: Publish to Maven Central
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_IN_MEMORY_KEY_PASSWORD }}
+        run: ./gradlew publishToMavenCentral
 
       - name: Build the release XCFramework
         run: ./gradlew :composure-ios:assembleComposureIosReleaseXCFramework
