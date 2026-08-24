@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-24
+
+No functional changes to `composure-core`, `composure-compose`, or `composure-ios` since 0.1.0. This version exists because 0.1.0 is already published to Maven Central, which doesn't allow re-publishing the same version, but never completed its GitHub Release or Swift Package Manager release due to the pipeline issues below.
+
 ## [0.2.0] - 2026-08-24
 
 No functional changes to `composure-core`, `composure-compose`, or `composure-ios` since 0.1.0. This version exists because 0.1.0 is already published to Maven Central, which doesn't allow re-publishing the same version, but never completed its GitHub Release or Swift Package Manager release due to the pipeline issues below.
