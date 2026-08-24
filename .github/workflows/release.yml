@@ -105,6 +105,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # Idempotent: a prior attempt on this same tag may have already
+          # created the release before failing on a later step. Replace it
+          # rather than failing here, without touching the tag itself.
+          gh release delete "${{ steps.version.outputs.tag }}" --yes || true
+
           if [ "${{ steps.changelog.outputs.has_notes }}" = "true" ]; then
             gh release create "${{ steps.version.outputs.tag }}" \
               "composure-ios/build/XCFrameworks/release/composureIos.xcframework.zip" \
