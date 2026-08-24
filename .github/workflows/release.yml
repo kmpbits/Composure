@@ -8,9 +8,10 @@ name: Release
 # Chicken-and-egg note: the checksum can only be computed *after* building
 # from the tagged commit, but Package.swift at that same commit needs to
 # already contain it for `swift package resolve` to work. This workflow
-# resolves that by committing the updated Package.swift to `main` and then
-# force-moving the tag to point at that new commit — the only tag ref this
-# workflow ever force-pushes, never a branch.
+# resolves that by committing the updated Package.swift directly on top of
+# the tagged commit (never pushed to main, which is protected here) and
+# force-moving the tag to point at that new commit. Only the tag ref is
+# ever force-pushed, never a branch.
 #
 # Required repo secrets: MAVEN_CENTRAL_USERNAME, MAVEN_CENTRAL_PASSWORD,
 # SIGNING_IN_MEMORY_KEY, SIGNING_IN_MEMORY_KEY_PASSWORD.
@@ -148,20 +149,23 @@ jobs:
           )
           EOF
 
-      - name: Commit Package.swift to main
+      - name: Commit Package.swift onto the tagged commit
         id: publish
         run: |
+          # Deliberately NOT pushed to main: `main` is a protected branch
+          # here, and nothing about SPM resolution requires Package.swift
+          # to exist there. This commit's only purpose is to be what the
+          # tag points at, so it's built directly on top of the commit the
+          # tag already referenced (still checked out from the first step)
+          # and only the tag ref gets pushed, never refs/heads/main.
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git checkout -B release-main origin/main
           cp /tmp/Package.swift ./Package.swift
           git add Package.swift
           if git diff --cached --quiet; then
             echo "Package.swift already up to date; nothing to commit"
           else
             git commit -m "release: SPM package for ${{ steps.version.outputs.tag }}"
-            git push origin release-main:main
           fi
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
