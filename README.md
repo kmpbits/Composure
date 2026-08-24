@@ -19,19 +19,25 @@ dependencies {
 }
 ```
 
-**SwiftUI** — via Swift Package Manager (recommended): in Xcode, *File → Add Package Dependencies…* and enter:
+**SwiftUI** — via Swift Package Manager (recommended):
 
-```
-https://github.com/kmpbits/Composure.git
-```
+1. In Xcode, go to *File → Add Package Dependencies…*
+2. Paste the repository URL into the search field in the top-right corner:
+   ```
+   https://github.com/kmpbits/Composure.git
+   ```
+3. Under *Dependency Rule*, pick a version rule (e.g. "Up to Next Major Version" starting at `0.1.0`), then click **Add Package**.
+4. In the target-selection sheet that appears, check the `Composure` product against the app target(s) that need it, then click **Add Package** again.
 
-Pick the `Composure` product and a version, or add it to your own `Package.swift`:
+Or, if you're depending on it from your own Swift package instead of an Xcode project, add it to `Package.swift`:
 
 ```swift
 .package(url: "https://github.com/kmpbits/Composure.git", from: "0.1.0")
 ```
 
-Then `import composure_ios` in Swift. Releases are published automatically from CI whenever a `vX.Y.Z` tag is pushed — see `.github/workflows/release.yml`.
+and add `.product(name: "Composure", package: "Composure")` to the relevant target's dependencies.
+
+Either way, `import composure_ios` in your Swift files afterward. Releases are published automatically from CI whenever a `vX.Y.Z` tag is pushed — see `.github/workflows/release.yml`.
 
 Alternatively, build the XCFramework yourself and link it manually:
 
