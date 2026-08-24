@@ -30,6 +30,11 @@ kotlin {
             // Exposes all composure-core types transitively to Swift
             api(project(":composure-core"))
         }
+
+        iosTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.coroutines.test)
+        }
     }
 }
 
