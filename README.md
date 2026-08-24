@@ -87,6 +87,31 @@ val form = rememberFormState { scope -> RegistrationForm(scope) }
 
 Built-in field types: `Email`, `Password`, `Name`, `Phone`, `Text` — each pre-bakes sensible default validators (e.g. `Email` requires a value and a valid format). Implement `FieldType` yourself for custom types.
 
+### Custom error messages
+
+Every built-in validator takes a `message` parameter, and `messages()` overrides a type's default required/format messages:
+
+```kotlin
+val email = scope.field(Email) {
+    messages(required = "We need your email", format = "That doesn't look like an email")
+}
+
+val password = scope.field(Password) {
+    minLength(8, "Needs to be at least 8 characters")
+}
+```
+
+For fully custom validation logic, use `addValidator` inside the field's builder block:
+
+```kotlin
+val username = scope.field(Text) {
+    addValidator { value ->
+        if (value.contains(" ")) ValidationResult.Invalid("No spaces allowed")
+        else ValidationResult.Valid
+    }
+}
+```
+
 ## Usage (SwiftUI)
 
 ```swift
