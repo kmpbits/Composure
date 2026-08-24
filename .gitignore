@@ -56,5 +56,6 @@ DerivedData/
 *.perspectivev3
 !default.perspectivev3
 
-# Xcode scheme files are user-specific
+# Xcode scheme files are user-specific — except shared schemes, which CI needs
 **/*.xcscheme
+!**/xcshareddata/xcschemes/*.xcscheme
