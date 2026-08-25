@@ -87,6 +87,39 @@ val form = rememberFormState { scope -> RegistrationForm(scope) }
 
 Built-in field types: `Email`, `Password`, `Name`, `Phone`, `Text` — each pre-bakes sensible default validators (e.g. `Email` requires a value and a valid format). Implement `FieldType` yourself for custom types.
 
+### Surviving configuration changes
+
+`rememberFormState` behaves like plain `remember` — the form lives for as long as the composition does, and is lost on an Android configuration change (or any other event that discards composition). There is no `rememberSaveable` variant, deliberately: `FormScope` holds a `CoroutineScope`, `StateFlow`s, and `Job`s, none of which are `Bundle`-safe, and "configuration change" isn't even a concept on iOS/Desktop/Wasm, so a `rememberSaveable`-style API would silently do nothing on non-Android targets while implying it does.
+
+For forms that need to survive configuration changes, hoist `FormScope` into a `ViewModel` instead. It's plain Kotlin with no Compose dependency, so it drops in without `rememberFormState` at all:
+
+```kotlin
+class LoginViewModel : ViewModel() {
+    private val scope = FormScope(viewModelScope)
+    val form = LoginForm(scope)
+}
+
+// in the composable
+val form = viewModel<LoginViewModel>().form
+```
+
+If you need process-death survival too (or want to keep using `rememberFormState` and persist manually), use `FormScope.saveFieldData()` / `restoreFieldData()` to round-trip field values through a `SavedStateHandle`:
+
+```kotlin
+class LoginViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
+    private val scope = FormScope(viewModelScope)
+    val form = LoginForm(scope).also {
+        savedStateHandle.get<Map<String, List<String?>>>("form")?.let(scope::restoreFieldData)
+    }
+
+    fun persist() {
+        savedStateHandle["form"] = scope.saveFieldData()
+    }
+}
+```
+
+Call `persist()` whenever you want the current values committed (e.g. from `onCleared`, before navigating away, or after each submit attempt). `onCleared()` alone isn't enough — it doesn't run on process death — and `FormScope` doesn't currently expose a single "any field changed" stream, so continuous autosave on every keystroke is on you to wire up if you need it.
+
 ### Custom error messages
 
 Every built-in validator takes a `message` parameter, and `messages()` overrides a type's default required/format messages:

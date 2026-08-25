@@ -13,24 +13,36 @@ import androidx.compose.runtime.rememberCoroutineScope
  * form class. Fields declared via [FormScope.field] are automatically
  * registered and managed.
  *
- * **Android config-change survival:** hoist your form into a `ViewModel`
- * rather than relying on composition memory. [FormScope] is plain Kotlin, so
- * it fits naturally in a ViewModel without any Compose dependency:
+ * **Does not survive configuration changes.** This behaves like plain
+ * `remember` — the form is lost whenever composition is discarded (e.g. an
+ * Android configuration change). There is intentionally no `rememberSaveable`
+ * variant: [FormScope] holds a `CoroutineScope`, `StateFlow`s, and `Job`s,
+ * none of which are `Bundle`-safe, and "configuration change" isn't even a
+ * concept on iOS/Desktop/Wasm.
+ *
+ * If a form needs to survive configuration changes, hoist it into a
+ * `ViewModel` instead. [FormScope] is plain Kotlin, so it fits naturally in a
+ * ViewModel without any Compose dependency:
  *
  * ```kotlin
  * class LoginViewModel : ViewModel() {
- *     private val _scope = FormScope(viewModelScope)
- *     val form = LoginForm(_scope)
+ *     private val scope = FormScope(viewModelScope)
+ *     val form = LoginForm(scope)
  * }
  * ```
+ *
+ * For process-death survival on top of that, use [FormScope.saveFieldData] /
+ * [FormScope.restoreFieldData] to round-trip field values through a
+ * `SavedStateHandle` — see the README's "Surviving configuration changes"
+ * section for a full example.
  *
  * ## Example
  *
  * ```kotlin
  * class RegistrationForm(scope: FormScope) : FormController by scope {
- *     val email    = scope.field(Email) { async(checkEmailUseCase) }
+ *     val email = scope.field(Email) { async(checkEmailUseCase) }
  *     val password = scope.field(Password) { minLength(8); hasDigit() }
- *     val confirm  = scope.field(Password)
+ *     val confirm = scope.field(Password)
  * }
  *
  * val form = rememberFormState { scope -> RegistrationForm(scope) }
